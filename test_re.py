@@ -24,7 +24,6 @@ def getfilelist(mail_dir, filelist):
             getfilelist(newdir, filelist)
     return filelist
 
-
 file_list = getfilelist(path, [])
 
 forwardIndex = dict()
@@ -152,16 +151,7 @@ cur = con.cursor()
 str = "jenniferANDcheckedORNOTcall"
 
 def match_query(str):
-    if re.search('NOT', str) != None:
-        begin = re.search('NOT', str).span()[0]
-        end = re.search('NOT', str).span()[1]
-        temp1 = str[0:begin]
-        temp2 = str[end:len(str)]
-
-        return list(set(match_query(temp1)).difference(set(match_query(temp2))))
-        # return match_query(temp1) + "!" + match_query(temp2)
-
-    elif re.search('AND', str) != None:
+    if re.search('AND', str) != None:
         begin = re.search('AND', str).span()[0]
         end = re.search('AND', str).span()[1]
         temp1 = str[0:begin]
@@ -178,6 +168,13 @@ def match_query(str):
 
         return list(set(match_query(temp1)).union(set(match_query(temp2))))
         # return match_query(temp1) + "|" + match_query(temp2)
+
+    elif re.search('NOT', str) != None:
+        begin = re.search('NOT', str).span()[0]
+        end = re.search('NOT', str).span()[1]
+        temp = str[end:len(str)]
+        return list(set(file_list).difference(set(match_query(temp))))
+        # return match_query(temp1) + "!" + match_query(temp2)
 
     else:
         templist = list()
