@@ -1,0 +1,17 @@
+forwordIndex [路径-[词项-频率]]
+invertIndex [词项-[路径-频率]]
+word_line_Index [词项-行数]
+word_df_Index [词项-频率]
+path_column_Index [路径-列数]
+
+tf_idf矩阵 [A[路径][词项]]
+
+bool查询 利用invertIndex查询
+
+语义检索 利用tf_idf矩阵查询
+
+SQL中
+
+tf_idf i j Aij 联合主键
+
+invertIndex 词项 路径 可变长度
