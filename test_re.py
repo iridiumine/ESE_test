@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 import re
 import numpy as np
 import math
-
+import sqlite3
 
 # path = '/Users/apple/Desktop/data/maildir/arnold-j/active_international'
 path = '/Users/apple/Desktop/data'
@@ -82,7 +82,6 @@ word_line_Index = dict()
 
 word_df_Index = dict()
 
-
 for i in range(len(forwardIndex)):
     path_column_Index[list(forwardIndex.keys())[i]] = i
 
@@ -118,8 +117,73 @@ for column_it in range(column):
         columninmatrix = column_it
         tf_idf[lineinmatrix][columninmatrix] = (1+math.log(word_tf.get(word), 10))*math.log(word_df_Index.get(word), 10)
 
-print(tf_idf)
+# print(tf_idf)
 
 # path1 = '/Users/apple/Desktop/data/maildir/arnold-j/2000_conference/1'
 # word1 = 'jennifer'
 # print(tf_idf[word_line_Index.get(word1)][path_column_Index.get(path1)])
+
+# for i in range(len(invertIndex)):
+#    for j in range(len(list(invertIndex.values())[i])):
+#       print(list(invertIndex.keys())[i])
+#       print(list(list(invertIndex.values())[i])[j])
+
+con = sqlite3.connect("invertIndex.db")
+
+cur = con.cursor()
+
+sql = "CREATE TABLE IF NOT EXISTS test(word text, id integer, path text , primary key (word, id))"
+
+cur.execute(sql)
+
+for i in range(len(invertIndex)):
+    for j in range(len(list(invertIndex.values())[i])):
+      cur.execute("INSERT OR IGNORE INTO test(word, id, path) values(?, ?, ?)", (list(invertIndex.keys())[i], j, list(list(invertIndex.values())[i])[j]))
+
+con.commit()
+
+cur.close()
+con.close()
+
+con = sqlite3.connect("invertIndex.db")
+
+cur = con.cursor()
+
+str = "jenniferANDcheckedORNOTcall"
+
+def match_query(str):
+    if re.search('NOT', str) != None:
+        begin = re.search('NOT', str).span()[0]
+        end = re.search('NOT', str).span()[1]
+        temp1 = str[0:begin]
+        temp2 = str[end:len(str)]
+
+        return list(set(match_query(temp1)).difference(set(match_query(temp2))))
+        # return match_query(temp1) + "!" + match_query(temp2)
+
+    elif re.search('AND', str) != None:
+        begin = re.search('AND', str).span()[0]
+        end = re.search('AND', str).span()[1]
+        temp1 = str[0:begin]
+        temp2 = str[end:len(str)]
+
+        return list(set(match_query(temp1)).intersection(set(match_query(temp2))))
+        # return match_query(temp1) + "&" + match_query(temp2)
+
+    elif re.search('OR', str) != None:
+        begin = re.search('OR', str).span()[0]
+        end = re.search('OR', str).span()[1]
+        temp1 = str[0:begin]
+        temp2 = str[end:len(str)]
+
+        return list(set(match_query(temp1)).union(set(match_query(temp2))))
+        # return match_query(temp1) + "|" + match_query(temp2)
+
+    else:
+        templist = list()
+        for row in cur.execute("select * from test where test.word = '" + str + "'"):
+            templist.append(row[2])
+        return templist
+
+# match_query(str)
+print(match_query(str))

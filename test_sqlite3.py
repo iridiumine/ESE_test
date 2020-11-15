@@ -117,7 +117,7 @@ for column_it in range(column):
     for word in word_tf.keys():
         lineinmatrix = word_line_Index.get(word)
         columninmatrix = column_it
-        tf_idf[lineinmatrix][columninmatrix] = (1+math.log(word_tf.get(word), 2))*math.log(word_df_Index.get(word), 10)
+        tf_idf[lineinmatrix][columninmatrix] = (1+math.log(word_tf.get(word), 10))*math.log(word_df_Index.get(word), 10)
 
 # print(tf_idf)
 
@@ -150,12 +150,36 @@ con.close()
 con = sqlite3.connect("invertIndex.db")
 
 cur = con.cursor()
+# for row in cur.execute("select * from test where test.word = 'jennifer'"):
+#     print(row[2])
 
-for row in cur.execute("select * from test where test.word = 'jennifer'"):
-   print(row[2])
+str = 'jennifer' #13
+str = 'checked' #1
+str = 'call' #23
+
+for row in cur.execute("select * from test where test.word = '" + str + "'"):
+    print(row[2])
 
 # cur.execute("select * from test")
 # print(cur.fetchall())
+
+# str = 'jennifer'
+# temp1 = list()
+# for row in cur.execute("select * from test where test.word = '" + str + "'"):
+#     print(row[2])
+#     temp1.append(row[2])
+# str = 'checked'
+# print(temp1)
+# temp2 = list()
+# for row in cur.execute("select * from test where test.word = '" + str + "'"):
+#     print(row[2])
+#     temp2.append(row[2])
+# print(temp2)
+# result = list(set(temp1).intersection(set(temp2)))
+# result = list(set(temp1).union(set(temp2)))
+# result = list(set(temp1).difference(set(temp2)))
+# print(result)
+
 
 cur.close()
 con.close()
@@ -183,12 +207,12 @@ con.commit()
 cur.close()
 con.close()
 
-con = sqlite3.connect("tf_idf.db")
-
-cur = con.cursor()
-
-cur.execute("select * from test")
-print(cur.fetchall())
-
-cur.close()
-con.close()
+# con = sqlite3.connect("tf_idf.db")
+#
+# cur = con.cursor()
+#
+# cur.execute("select * from test")
+# print(cur.fetchall())
+#
+# cur.close()
+# con.close()
