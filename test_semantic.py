@@ -130,65 +130,16 @@ for column_it in range(column):
 #       print(list(invertIndex.keys())[i])
 #       print(list(list(invertIndex.values())[i])[j])
 
-con = sqlite3.connect("invertIndex.db")
-
-cur = con.cursor()
-
-sql = "CREATE TABLE IF NOT EXISTS test(word text, id integer, path text , primary key (word, id))"
-
-cur.execute(sql)
-
-for i in range(len(invertIndex)):
-   for j in range(len(list(invertIndex.values())[i])):
-      cur.execute("INSERT OR IGNORE INTO test(word, id, path) values(?, ?, ?)", (list(invertIndex.keys())[i], j, list(list(invertIndex.values())[i])[j]))
-
-con.commit()
-
-cur.close()
-con.close()
-
-con = sqlite3.connect("invertIndex.db")
-
-cur = con.cursor()
-# for row in cur.execute("select * from test where test.word = 'jennifer'"):
-#     print(row[2])
-
-str = 'jennifer' #13
-str = 'checked' #1
-str = 'call' #23
-
-for row in cur.execute("select * from test where test.word = '" + str + "'"):
-    print(row[2])
-
-# cur.execute("select * from test")
-# print(cur.fetchall())
-
-# str = 'jennifer'
-# temp1 = list()
-# for row in cur.execute("select * from test where test.word = '" + str + "'"):
-#     print(row[2])
-#     temp1.append(row[2])
-# str = 'checked'
-# print(temp1)
-# temp2 = list()
-# for row in cur.execute("select * from test where test.word = '" + str + "'"):
-#     print(row[2])
-#     temp2.append(row[2])
-# print(temp2)
-# result = list(set(temp1).intersection(set(temp2)))
-# result = list(set(temp1).union(set(temp2)))
-# result = list(set(temp1).difference(set(temp2)))
-# print(result)
-
-
-cur.close()
-con.close()
+# for i in range(len(forwardIndex)):
+#     print(list(forwardIndex.keys())[i])
+#     for j in range(len(list(forwardIndex.values())[i])):
+#         print(list(list(forwardIndex.values())[i])[j])
 
 con = sqlite3.connect("tf_idf.db")
 
 cur = con.cursor()
 
-sql = "CREATE TABLE IF NOT EXISTS test(path text, word text, td_idf real , primary key (path, word))"
+sql = "CREATE TABLE IF NOT EXISTS test(path text, word text, line integer, td_idf real , primary key (path, word))"
 
 cur.execute(sql)
 
@@ -199,8 +150,8 @@ cur.execute(sql)
 
 for i in range(len(invertIndex)):
    for j in range(len(list(invertIndex.values())[i])):
-      cur.execute("INSERT OR IGNORE INTO test(path, word, td_idf) values(?, ?, ?)",
-                  (list(list(invertIndex.values())[i])[j], list(invertIndex.keys())[i], tf_idf[word_line_Index.get(list(invertIndex.keys())[i])][path_column_Index.get(list(list(invertIndex.values())[i])[j])]))
+      cur.execute("INSERT OR IGNORE INTO test(path, word, line, td_idf) values(?, ?, ?, ?)",
+                  (list(list(invertIndex.values())[i])[j], list(invertIndex.keys())[i], word_line_Index.get(list(invertIndex.keys())[i]), tf_idf[word_line_Index.get(list(invertIndex.keys())[i])][path_column_Index.get(list(list(invertIndex.values())[i])[j])]))
 
 con.commit()
 
@@ -211,8 +162,27 @@ con = sqlite3.connect("tf_idf.db")
 
 cur = con.cursor()
 
-cur.execute("select * from test")
-print(cur.fetchall())
+# cur.execute("select * from test")
+# print(cur.fetchall())
+
+len_invertIndex = 238
+path = "/Users/apple/Desktop/data/maildir/arnold-j/2000_conference/1"
+
+def tf_idf_path(path, len_invertIndex):
+    templist = list()
+    line_last = 0
+    for word in invertIndex.keys():
+        for row in cur.execute("select * from test where test.path = '" + path + "' and test.word = '" + word + "'"):
+            for i in range(line_last, row[2]-1):
+                templist.append(0)
+            templist.append(row[3])
+            line_last = row[2]
+    for i in range(line_last, len_invertIndex):
+        templist.append(0)
+    return templist
+
+for i in forwardIndex:
+    print(tf_idf_path(i, len_invertIndex))
 
 cur.close()
 con.close()
